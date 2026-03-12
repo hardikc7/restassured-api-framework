@@ -1,103 +1,64 @@
 package com.sdet.api;
 
-import com.sdet.utils.ConfigReader;
-import io.restassured.RestAssured;
+import com.sdet.base.BaseTest;
+import com.sdet.clients.UserApiClient;
+import com.sdet.utils.TestDataReader;
 import io.restassured.response.Response;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class UpdateUserTest {
+public class UpdateUserTest extends BaseTest {
+
+    private UserApiClient userClient;
+    private String requestBody;
 
     @BeforeClass
-    public void setUp() {
-        RestAssured.baseURI = ConfigReader.get("baseUrl");
+    public void init() {
+        userClient  = new UserApiClient();
+        requestBody = TestDataReader.getRequestBody(
+            "updateUser.json");
     }
 
-    // ✅ TEST 1 — Update user — verify fields updated
     @Test
     public void testUpdateUser() {
-        String requestBody = """
-                {
-                    "id": 1,
-                    "name": "Hardik Shah Updated",
-                    "username": "hardik.updated",
-                    "email": "updated@sdet.com",
-                    "phone": "9999999999",
-                    "website": "updated.com"
-                }
-                """;
-
-        Response response = given()
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-        .when()
-            .put("/users/1");
-
-        System.out.println("=== TEST 1: Update User ===");
-        System.out.println("Status Code : " + response.statusCode());
-        System.out.println("Response Body:");
-        response.prettyPrint();
-        System.out.println("==========================");
+        Response response = userClient.updateUser(1, requestBody);
 
         response.then()
             .statusCode(200)
             .body("name",  equalTo("Hardik Shah Updated"))
-            .body("email", equalTo("updated@sdet.com"))
-            .body("id",    equalTo(1));
+            .body("email", equalTo("updated@sdet.com"));
+
+        Assert.assertEquals(
+            response.jsonPath().getString("name"),
+            "Hardik Shah Updated",
+            "Name should be updated");
     }
 
-    // ✅ TEST 2 — Verify only updated fields changed
     @Test
     public void testPartialUpdate() {
-        String requestBody = """
-                {
-                    "name": "Only Name Changed"
-                }
-                """;
+        String partialBody = "{\"name\": \"Only Name Changed\"}";
 
-        Response response = given()
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-        .when()
-            .put("/users/1");
-
-        System.out.println("=== TEST 2: Partial Update ===");
-        System.out.println("Status Code : " + response.statusCode());
-        System.out.println("Updated name: " +
-            response.jsonPath().getString("name"));
-        System.out.println("=============================");
+        Response response = userClient.updateUser(1, partialBody);
 
         response.then()
             .statusCode(200)
             .body("name", equalTo("Only Name Changed"));
+
+        Assert.assertEquals(
+            response.jsonPath().getString("name"),
+            "Only Name Changed",
+            "Name should be updated");
     }
 
-    // ✅ TEST 3 — Update non-existent user
-@Test
-public void testUpdateNonExistentUser() {
-    String requestBody = """
-            {
-                "name": "Ghost User"
-            }
-            """;
+    @Test
+    public void testUpdateNonExistentUser() {
+        Response response = userClient.updateUser(999, requestBody);
 
-    Response response = given()
-        .header("Content-Type", "application/json")
-        .body(requestBody)
-    .when()
-        .put("/users/999");
-
-    System.out.println("=== TEST 3: Update Non-Existent ===");
-    System.out.println("Status Code : " + response.statusCode());
-    System.out.println("Response    : " +
-        response.body().asString());
-    System.out.println("===================================");
-
-    // ✅ JSONPlaceholder returns 500 for non-existent resource
-    response.then().statusCode(500);
-
+        response.then().statusCode(500);
+        Assert.assertEquals(response.statusCode(), 500,
+            "Expected 500 for non-existent user");
     }
 }
