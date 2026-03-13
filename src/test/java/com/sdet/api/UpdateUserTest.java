@@ -3,6 +3,7 @@ package com.sdet.api;
 import com.sdet.base.BaseTest;
 import com.sdet.clients.UserApiClient;
 import com.sdet.utils.TestDataReader;
+
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;

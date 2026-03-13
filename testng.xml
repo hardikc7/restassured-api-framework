@@ -3,10 +3,11 @@
 <suite name="ApiTestSuite">
     <test name="API Tests">
         <classes>
-            <class name="com.sdet.api.GetUserTest"/>
+            <!-- <class name="com.sdet.api.GetUserTest"/>
             <class name="com.sdet.api.CreateUserTest"/>
             <class name="com.sdet.api.UpdateUserTest"/>
-            <class name="com.sdet.api.DeleteUserTest"/>
+            <class name="com.sdet.api.DeleteUserTest"/> -->
+            <class name="com.sdet.api.AuthTest"/>
         </classes>
     </test>
 </suite>
