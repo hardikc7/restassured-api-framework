@@ -13,18 +13,7 @@ public class AuthApiClient {
         ConfigReader.get("authBaseUrl");
     private static final String LOGIN_URL =
         ConfigReader.get("loginEndpoint");
-
-    // // ✅ Temporarily clears global spec so reqres.in is used
-    // private Response executeClean(RequestSpecification spec) {
-    //     RequestSpecification saved = RestAssured.requestSpecification;
-    //     RestAssured.requestSpecification = null;
-    //     try {
-    //         return given(spec).when().post(LOGIN_URL);
-    //     } finally {
-    //         RestAssured.requestSpecification = saved;
-    //     }
-    // }
-
+        
     public String login(String requestBody) {
         RequestSpecification spec = new RequestSpecBuilder()
             .setBaseUri(BASE_URL)
