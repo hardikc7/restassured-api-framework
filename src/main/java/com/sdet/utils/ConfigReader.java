@@ -9,13 +9,26 @@ public class ConfigReader {
 
     static {
         try {
+            // ✅ Read env from -Denv=dev, default to dev
+            String env = System.getProperty("env", "dev");
+            System.out.println("Running on environment: " + env);
+
+            String fileName = env + ".properties";
+
             InputStream input = ConfigReader.class
                 .getClassLoader()
-                .getResourceAsStream("config.properties");
+                .getResourceAsStream(fileName);
+
+            if (input == null) {
+                throw new RuntimeException(
+                    fileName + " not found in resources");
+            }
+
             props.load(input);
+
         } catch (Exception e) {
             throw new RuntimeException(
-                "config.properties not found: " + e.getMessage());
+                "Failed to load config: " + e.getMessage());
         }
     }
 
