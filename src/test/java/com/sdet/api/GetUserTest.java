@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import com.sdet.utils.RetryUtil;
 
 import static org.hamcrest.Matchers.*;
 
@@ -21,21 +22,22 @@ public class GetUserTest extends BaseTest {
 
     @Test
     public void testGetSingleUser() {
-        Response response = userClient.getUser(1);
+
+        Response response = RetryUtil.executeWithRetry(() -> userClient.getUser(1));
 
         // ✅ RestAssured assertion
         response.then()
-            .statusCode(200)
-            .body("id",    equalTo(1))
-            .body("name",  notNullValue())
-            .body("email", notNullValue());
+                .statusCode(200)
+                .body("id", equalTo(1))
+                .body("name", notNullValue())
+                .body("email", notNullValue());
 
         // ✅ TestNG assertion with custom message
         Assert.assertEquals(response.jsonPath().getInt("id"), 1,
-            "User ID should be 1");
+                "User ID should be 1");
         Assert.assertNotNull(
-            response.jsonPath().getString("name"),
-            "Name should not be null");
+                response.jsonPath().getString("name"),
+                "Name should not be null");
     }
 
     @Test
@@ -43,14 +45,14 @@ public class GetUserTest extends BaseTest {
         Response response = userClient.getAllUsers();
 
         response.then()
-            .statusCode(200)
-            .body("$",      notNullValue())
-            .body("size()", greaterThan(0));
+                .statusCode(200)
+                .body("$", notNullValue())
+                .body("size()", greaterThan(0));
 
         int totalUsers = response.jsonPath().getList("$").size();
         System.out.println("Total users: " + totalUsers);
         Assert.assertTrue(totalUsers > 0,
-            "User list should not be empty");
+                "User list should not be empty");
     }
 
     @Test
@@ -59,7 +61,7 @@ public class GetUserTest extends BaseTest {
 
         response.then().statusCode(404);
         Assert.assertEquals(response.statusCode(), 404,
-            "Expected 404 for non-existent user");
+                "Expected 404 for non-existent user");
     }
 
     @Test
@@ -71,6 +73,6 @@ public class GetUserTest extends BaseTest {
 
         response.then().statusCode(200);
         Assert.assertTrue(responseTime < 3000,
-            "Too slow: " + responseTime + "ms");
+                "Too slow: " + responseTime + "ms");
     }
 }
