@@ -1,7 +1,6 @@
 package com.sdet.clients;
 
 import com.sdet.utils.ConfigReader;
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -13,7 +12,7 @@ public class AuthApiClient {
         ConfigReader.get("authBaseUrl");
     private static final String LOGIN_URL =
         ConfigReader.get("loginEndpoint");
-        
+
     public String login(String requestBody) {
         RequestSpecification spec = new RequestSpecBuilder()
             .setBaseUri(BASE_URL)
@@ -21,17 +20,9 @@ public class AuthApiClient {
             .setBody(requestBody)
             .build();
 
-        RequestSpecification saved = RestAssured.requestSpecification;
-        RestAssured.requestSpecification = null;
-
-        Response response;
-        try {
-            response = given(spec).when().post(LOGIN_URL);
-        } finally {
-            RestAssured.requestSpecification = saved;
-        }
+        Response response = given(spec).when().post(LOGIN_URL);
         String token = response.jsonPath().getString("accessToken");
-        System.out.println("Token: "  + token);
+        System.out.println("Token: " + token);
         return token;
     }
 
@@ -41,15 +32,8 @@ public class AuthApiClient {
             .addHeader("Content-Type", "application/json")
             .addHeader("Authorization", "Bearer " + token)
             .build();
-    
-        RequestSpecification saved = RestAssured.requestSpecification;
-        RestAssured.requestSpecification = null;
-    
-        try {
-            return given(spec).when().get("/users/" + userId);  // ← removed /api
-        } finally {
-            RestAssured.requestSpecification = saved;
-        }
+
+        return given(spec).when().get("/users/" + userId);
     }
 
     public Response loginWithoutCredentials() {
@@ -58,13 +42,6 @@ public class AuthApiClient {
             .addHeader("Content-Type", "application/json")
             .build();
 
-        RequestSpecification saved = RestAssured.requestSpecification;
-        RestAssured.requestSpecification = null;
-
-        try {
-            return given(spec).when().post(LOGIN_URL);
-        } finally {
-            RestAssured.requestSpecification = saved;
-        }
+        return given(spec).when().post(LOGIN_URL);
     }
 }

@@ -2,7 +2,7 @@ package com.sdet.api;
 
 import com.sdet.base.BaseTest;
 import com.sdet.clients.UserApiClient;
-
+import java.util.function.Supplier;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -23,8 +23,9 @@ public class GetUserTest extends BaseTest {
     @Test
     public void testGetSingleUser() {
 
-        Response response = RetryUtil.executeWithRetry(() -> userClient.getUser(1));
-
+        Response response = RetryUtil.executeWithRetry(
+                (Supplier<Response>) () -> userClient.getUser(1)
+            );
         // ✅ RestAssured assertion
         response.then()
                 .statusCode(200)
